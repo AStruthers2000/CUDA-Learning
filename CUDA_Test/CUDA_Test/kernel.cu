@@ -125,21 +125,48 @@ Error:
 
 #include <iostream>
 #include <math.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
 
+#include <stdio.h>
+
+__global__
 void add(int n, float* x, float* y)
 {
+    /*
     for (int i = 0; i < n; i++)
     {
         y[i] = x[i] + y[i];
     }
+    */
+
+    
+    /*
+    int index = threadIdx.x;
+    int stride = blockDim.x;
+    for (int i = index; i < n; i += stride)
+    {
+        y[i] = x[i] + y[i];
+    }
+    */
+    
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+    for (int i = index; i < n; i += stride)
+        y[i] = x[i] + y[i];
 }
 
 int main(void)
 {
     int N = 1 << 20;
 
+    /*
     float* x = new float[N];
     float* y = new float[N];
+    */
+    float* x, * y;
+    cudaMallocManaged(&x, N * sizeof(float));
+    cudaMallocManaged(&y, N * sizeof(float));
 
     for (int i = 0; i < N; i++)
     {
@@ -147,8 +174,10 @@ int main(void)
         y[i] = 2.f;
     }
 
-    add(N, x, y);
-
+    int blockSize = 256;
+    int numBlocks = (N + blockSize - 1) / blockSize;
+    add<<<numBlocks, blockSize>>>(N, x, y);
+    cudaDeviceSynchronize();
     float maxError = 0.f;
     float expected = 3.f;
     for (int i = 0; i < N; i++)
@@ -158,8 +187,14 @@ int main(void)
     std::cout << "Max error: " << maxError << std::endl;
 
     //for every invocation of new, we also need to delete
+    /*
     delete[] x;
     delete[] y;
+    */
+
+    //now, for every invocation of cudaMalloc, we also need to cudaFree
+    cudaFree(x);
+    cudaFree(y);
 
     return 0;
 }
