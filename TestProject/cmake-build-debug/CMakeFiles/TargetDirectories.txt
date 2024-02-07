@@ -1,0 +1,3 @@
+C:/Users/Strut/Documents/My Documents/Code/CUDA/TestProject/cmake-build-debug/CMakeFiles/TestProject.dir
+C:/Users/Strut/Documents/My Documents/Code/CUDA/TestProject/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Strut/Documents/My Documents/Code/CUDA/TestProject/cmake-build-debug/CMakeFiles/rebuild_cache.dir
